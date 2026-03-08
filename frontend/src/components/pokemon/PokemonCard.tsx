@@ -1,4 +1,4 @@
-import { Pokemon, PokemonGender, PokemonHealthStatus } from '@/types';
+import { Pokemon, PokemonGender, PokemonHealthStatus, User, UserRole } from '@/types';
 
 import Image from 'next/image'; 
 
@@ -40,19 +40,20 @@ function getPokemonImageUrl(pokedexNumber: number): string {
 
 interface PokemonCardProps {
   pokemon: Pokemon;
-  currentUserId: string;
+  currentUser: User | null;
   onEdit: (pokemon: Pokemon) => void;
   onDelete: (pokemon: Pokemon) => void;
 }
 
 export default function PokemonCard({
   pokemon,
-  currentUserId,
+  currentUser,
   onEdit,
   onDelete,
 }: PokemonCardProps) {
-  // Verifica se o usuário logado é o dono do pokémon
-  const isOwner = pokemon.createdBy?.id === currentUserId;
+  
+  const isOwner = pokemon.createdBy?.id === currentUser?.id;
+  const isNurse = currentUser?.role === UserRole.NURSE;
   const healthStyle = HEALTH_STATUS_STYLE[pokemon.healthStatus];
   
   const imageUrl = getPokemonImageUrl(pokemon.pokedexNumber);
@@ -160,8 +161,7 @@ export default function PokemonCard({
           Treinador: {pokemon.createdBy?.name ?? 'Desconhecido'}
         </p>
 
-        {/* Botões — apenas para o dono */}
-        {isOwner && (
+        {isOwner && !isNurse && (
           <div className="card-actions justify-end mt-1">
             <button
               onClick={() => onEdit(pokemon)}
@@ -177,7 +177,6 @@ export default function PokemonCard({
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

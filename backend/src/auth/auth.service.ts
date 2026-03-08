@@ -19,9 +19,10 @@ export class AuthService {
 			name: dto.name,
 			email: dto.email,
 			password: hashedPassword,
+      role: dto.role,
 		});
 
-		return this.generateToken(user.id, user.email);
+		return this.generateToken(user.id, user.email, user.role);
 	}
 
 	async login(dto: LoginDto) {
@@ -38,11 +39,11 @@ export class AuthService {
 			throw new UnauthorizedException('Credenciais inválidas');
 		}
 
-		return this.generateToken(user.id, user.email);
+		return this.generateToken(user.id, user.email, user.role);
 	}
 
-	private generateToken(userId: string, email: string) {
-		const payload = { sub: userId, email };
+	private generateToken(userId: string, email: string, role: string) {
+		const payload = { sub: userId, email, role };
 		return {
 			access_token: this.jwtService.sign(payload),
 		};

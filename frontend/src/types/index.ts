@@ -35,10 +35,16 @@ export enum PokemonHealthStatus {
 	POISONED = 'Poisoned',
 }
 
+export enum UserRole {
+  TRAINER = 'trainer',
+  NURSE = 'nurse',
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
 }
 
 export interface Pokemon {

@@ -8,26 +8,26 @@ import { PokemonsModule } from './pokemons/pokemons.module';
 import { Pokemon } from './pokemons/entities/pokemon.entity';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        entities: [User, Pokemon],
-        // TODO: quando estiver em produção, trocar por false e utilizar migrations
-        synchronize: true,
-      }),
-      inject: [ConfigService],
-    }),
-    AuthModule,
-    UsersModule,
-    PokemonsModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({ isGlobal: true }),
+		TypeOrmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				type: 'postgres',
+				host: configService.get('DB_HOST'),
+				port: configService.get<number>('DB_PORT'),
+				username: configService.get('DB_USERNAME'),
+				password: configService.get('DB_PASSWORD'),
+				database: configService.get('DB_NAME'),
+				entities: [User, Pokemon],
+				// TODO: quando estiver em produção, trocar por false e utilizar migrations
+				synchronize: true,
+			}),
+			inject: [ConfigService],
+		}),
+		AuthModule,
+		UsersModule,
+		PokemonsModule,
+	],
 })
 export class AppModule {}

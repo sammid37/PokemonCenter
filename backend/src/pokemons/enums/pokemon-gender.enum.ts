@@ -1,4 +1,4 @@
 export enum PokemonGender {
-  MALE = 'Male',
-  FEMALE = 'Female',
+	MALE = 'Male',
+	FEMALE = 'Female',
 }

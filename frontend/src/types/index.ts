@@ -19,6 +19,22 @@ export enum PokemonType {
   FAIRY = 'Fairy',
 }
 
+export enum PokemonGender { 
+  MALE = 'Male',
+  FEMALE = 'Female',
+} 
+
+export enum PokemonHealthStatus {
+  ASLEEP = 'Asleep',
+	BADLY_POISONED = 'Badly Poisoned',
+	BURNED = 'Burned',
+	FAINTED = 'Fainted',
+	FROZEN = 'Frozen',
+	HEALTHY = 'Healthy',
+	PARALYZED = 'Paralyzed',
+	POISONED = 'Poisoned',
+}
+
 export interface User {
   id: string;
   name: string;
@@ -28,10 +44,15 @@ export interface User {
 export interface Pokemon {
   id: string;
   name: string;
+  nickname: string | null;
   types: PokemonType[];
   level: number;
   hp: number;
   pokedexNumber: number;
+  height: number;
+  weight: number;
+  gender: PokemonGender;
+  healthStatus: PokemonHealthStatus;
   createdBy: User;
 }
 

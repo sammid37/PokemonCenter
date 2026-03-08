@@ -1,0 +1,52 @@
+# .github/workflows/backend-tests.yml
+name: Backend Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**' # Só executa quando houver mudanças no backend
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend # Todos os comandos rodam dentro de /backend
+
+    steps:
+      # 1. Faz o checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configura o Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      # 3. Instala as dependências
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Verifica erros de lint
+      - name: Run lint
+        run: npm run lint
+
+      # 5. Roda os testes e gera relatório de cobertura
+      - name: Run tests
+        run: npm run test:cov
+
+      # 6. Publica o relatório de cobertura como artefato
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/coverage

@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { CreatePokemonDto, Pokemon, PokemonType, UpdatePokemonDto } from '@/types';
+import {
+  CreatePokemonDto,
+  Pokemon,
+  PokemonGender,
+  PokemonHealthStatus,
+  PokemonType,
+  UpdatePokemonDto,
+} from '@/types';
 
 interface PokemonFormProps {
   initialData?: Pokemon;
@@ -14,15 +21,22 @@ const ALL_TYPES = Object.values(PokemonType);
 export default function PokemonForm({ initialData, onSubmit, isLoading }: PokemonFormProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name ?? '',
+    nickname: initialData?.nickname ?? '',
     level: initialData?.level ?? 1,
     hp: initialData?.hp ?? 1,
     pokedexNumber: initialData?.pokedexNumber ?? 1,
+    height: initialData?.height ?? 0.1,
+    weight: initialData?.weight ?? 0.1,
     types: initialData?.types ?? [],
+    gender: initialData?.gender ?? PokemonGender.MALE,
+    healthStatus: initialData?.healthStatus ?? PokemonHealthStatus.HEALTHY,
   });
   const [error, setError] = useState<string | null>(null);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value, type } = e.target;
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) {
+    const { name, value, type } = e.target as HTMLInputElement;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'number' ? Number(value) : value,
@@ -33,12 +47,10 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
     setFormData((prev) => {
       const alreadySelected = prev.types.includes(type);
 
-      // Remove o tipo se já estiver selecionado
       if (alreadySelected) {
         return { ...prev, types: prev.types.filter((t) => t !== type) };
       }
 
-      // Bloqueia seleção de mais de 2 tipos
       if (prev.types.length >= 2) {
         setError('Um pokémon pode ter no máximo 2 tipos');
         return prev;
@@ -58,7 +70,13 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
       return;
     }
 
-    await onSubmit(formData);
+    // Remove o nickname do payload se estiver vazio
+    const payload = {
+      ...formData,
+      nickname: formData.nickname.trim() || undefined,
+    };
+
+    await onSubmit(payload);
   }
 
   return (
@@ -70,21 +88,40 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </div>
       )}
 
-      {/* Nome */}
-      <label className="form-control">
-        <div className="label">
-          <span className="label-text">Nome</span>
-        </div>
-        <input
-          type="text"
-          name="name"
-          placeholder="Pikachu"
-          className="input input-bordered input-sm w-full"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </label>
+      {/* Nome e Apelido */}
+      <div className="grid grid-cols-2 gap-3">
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">Nome da espécie</span>
+          </div>
+          <input
+            type="text"
+            name="name"
+            placeholder="Pikachu"
+            className="input input-bordered input-sm w-full"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </label>
+
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">
+              Apelido{' '}
+              <span className="text-base-content/50 text-xs">(opcional)</span>
+            </span>
+          </div>
+          <input
+            type="text"
+            name="nickname"
+            placeholder="Apelido do seu pokémon"
+            className="input input-bordered input-sm w-full"
+            value={formData.nickname}
+            onChange={handleChange}
+          />
+        </label>
+      </div>
 
       {/* Número da Pokédex */}
       <label className="form-control">
@@ -103,7 +140,7 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         />
       </label>
 
-      {/* Nível e HP lado a lado */}
+      {/* Nível e HP */}
       <div className="grid grid-cols-2 gap-3">
         <label className="form-control">
           <div className="label">
@@ -138,7 +175,83 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </label>
       </div>
 
-      {/* Seleção de tipos */}
+      {/* Altura e Peso */}
+      <div className="grid grid-cols-2 gap-3">
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">Altura (m)</span>
+          </div>
+          <input
+            type="number"
+            name="height"
+            className="input input-bordered input-sm w-full"
+            value={formData.height}
+            onChange={handleChange}
+            min={0.1}
+            step={0.1}
+            required
+          />
+        </label>
+
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">Peso (kg)</span>
+          </div>
+          <input
+            type="number"
+            name="weight"
+            className="input input-bordered input-sm w-full"
+            value={formData.weight}
+            onChange={handleChange}
+            min={0.1}
+            step={0.1}
+            required
+          />
+        </label>
+      </div>
+
+      {/* Sexo e Status de saúde */}
+      <div className="grid grid-cols-2 gap-3">
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">Sexo</span>
+          </div>
+          <select
+            name="gender"
+            className="select select-bordered select-sm w-full"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+          >
+            <option value={PokemonGender.MALE}>♂ Macho</option>
+            <option value={PokemonGender.FEMALE}>♀ Fêmea</option>
+          </select>
+        </label>
+
+        <label className="form-control">
+          <div className="label">
+            <span className="label-text">Status de saúde</span>
+          </div>
+          <select
+            name="healthStatus"
+            className="select select-bordered select-sm w-full"
+            value={formData.healthStatus}
+            onChange={handleChange}
+            required
+          >
+            <option value={PokemonHealthStatus.HEALTHY}>✓ Saudável</option>
+            <option value={PokemonHealthStatus.POISONED}>☠ Envenenado</option>
+            <option value={PokemonHealthStatus.BADLY_POISONED}>☠☠ Env. Grave</option>
+            <option value={PokemonHealthStatus.BURNED}>🔥 Queimado</option>
+            <option value={PokemonHealthStatus.PARALYZED}>⚡ Paralisado</option>
+            <option value={PokemonHealthStatus.ASLEEP}>💤 Dormindo</option>
+            <option value={PokemonHealthStatus.FROZEN}>❄ Congelado</option>
+            <option value={PokemonHealthStatus.FAINTED}>✕ Desmaiado</option>
+          </select>
+        </label>
+      </div>
+
+      {/* Tipos */}
       <div className="form-control">
         <div className="label">
           <span className="label-text">

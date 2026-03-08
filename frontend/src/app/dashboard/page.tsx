@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pokemon, User, CreatePokemonDto, UpdatePokemonDto } from '@/types';
+import { Pokemon, User, UserRole, CreatePokemonDto, UpdatePokemonDto } from '@/types';
 import { pokemonService } from '@/services/pokemon.service';
 import { authService } from '@/services/auth.service';
 import Navbar from '@/components/ui/Navbar';
@@ -26,7 +26,8 @@ export default function DashboardPage() {
   const [deleteTarget, setDeleteTarget] = useState<Pokemon | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Carrega os pokémons e o usuário logado ao montar o componente
+  const isNurse = currentUser?.role === UserRole.NURSE;
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -62,13 +63,12 @@ export default function DashboardPage() {
   }
 
   async function handleEdit(data: CreatePokemonDto | UpdatePokemonDto) {
-    if (modal.open && modal.mode !== 'edit') return;
-    const pokemon = (modal as { open: true; mode: 'edit'; pokemon: Pokemon }).pokemon;
+    if (!modal.open || modal.mode !== 'edit') return;
 
     setIsSubmitting(true);
     setError(null);
     try {
-      const updated = await pokemonService.update(pokemon.id, data);
+      const updated = await pokemonService.update(modal.pokemon.id, data);
       setPokemons((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
       setModal({ open: false });
     } catch (err: any) {
@@ -97,39 +97,58 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <Navbar />
+      <Navbar user={currentUser} />
 
       <main className="container mx-auto px-4 py-8">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Pokédex</h1>
+            <h1 className="text-2xl font-bold">
+              {isNurse ? '🏥 Pokémons no Centro' : '🎒 Meus Pokémons'}
+            </h1>
             <p className="text-base-content/50 text-sm">
-              {pokemons.length} pokémon{pokemons.length !== 1 ? 's' : ''} cadastrado{pokemons.length !== 1 ? 's' : ''}
+              {isNurse
+                ? `${pokemons.length} pokémon${pokemons.length !== 1 ? 's' : ''} sob cuidados`
+                : `${pokemons.length} pokémon${pokemons.length !== 1 ? 's' : ''} cadastrado${pokemons.length !== 1 ? 's' : ''}`
+              }
             </p>
           </div>
-          <button
-            onClick={() => setModal({ open: true, mode: 'create' })}
-            className="btn btn-neutral btn-sm"
-          >
-            + Novo Pokémon
-          </button>
+
+          {/* Botão de novo pokémon — apenas para treinadores */}
+          {!isNurse && (
+            <button
+              onClick={() => setModal({ open: true, mode: 'create' })}
+              className="btn btn-primary btn-sm"
+            >
+              + Novo Pokémon
+            </button>
+          )}
         </div>
 
         {/* Alerta de erro */}
         {error && (
           <div role="alert" className="alert alert-error mb-4">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="btn btn-ghost btn-xs">✕</button>
+            <button onClick={() => setError(null)} className="btn btn-ghost btn-xs">
+              ✕
+            </button>
           </div>
         )}
 
         {/* Lista de pokémons */}
         {pokemons.length === 0 ? (
           <div className="text-center py-16 text-base-content/50">
-            <p className="text-lg">Nenhum pokémon cadastrado ainda.</p>
-            <p className="text-sm mt-1">Clique em &quot;Novo Pokémon&quot; para começar!</p>
+            <p className="text-lg">
+              {isNurse
+                ? 'Nenhum pokémon no centro no momento.'
+                : 'Nenhum pokémon cadastrado ainda.'}
+            </p>
+            {!isNurse && (
+              <p className="text-sm mt-1">
+                Clique em "Novo Pokémon" para começar!
+              </p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -137,7 +156,7 @@ export default function DashboardPage() {
               <PokemonCard
                 key={pokemon.id}
                 pokemon={pokemon}
-                currentUserId={currentUser?.id ?? ''}
+                currentUser={currentUser}
                 onEdit={(p) => setModal({ open: true, mode: 'edit', pokemon: p })}
                 onDelete={setDeleteTarget}
               />

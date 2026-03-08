@@ -43,6 +43,7 @@ interface PokemonCardProps {
   currentUser: User | null;
   onEdit: (pokemon: Pokemon) => void;
   onDelete: (pokemon: Pokemon) => void;
+  onRequestAction: (pokemon: Pokemon) => void;
 }
 
 export default function PokemonCard({
@@ -50,6 +51,7 @@ export default function PokemonCard({
   currentUser,
   onEdit,
   onDelete,
+  onRequestAction,
 }: PokemonCardProps) {
   
   const isOwner = pokemon.createdBy?.id === currentUser?.id;
@@ -162,7 +164,13 @@ export default function PokemonCard({
         </p>
 
         {isOwner && !isNurse && (
-          <div className="card-actions justify-end mt-1">
+          <div className="card-actions justify-end mt-1 flex-wrap">
+            <button
+              onClick={() => onRequestAction(pokemon)}
+              className="btn btn-outline btn-success btn-xs"
+            >
+              🏥 Solicitar cuidado
+            </button>
             <button
               onClick={() => onEdit(pokemon)}
               className="btn btn-outline btn-primary btn-xs"

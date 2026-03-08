@@ -85,4 +85,39 @@ export interface CreatePokemonDto {
   pokedexNumber: number;
 }
 
+export enum ActionType {
+  HEAL = 'heal',
+  FEED = 'feed',
+}
+
+export enum ActionStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
+export interface PokemonAction {
+  id: string;
+  pokemon: Pokemon;
+  requestedBy: User;
+  reviewedBy: User | null;
+  type: ActionType;
+  status: ActionStatus;
+  trainerNote: string | null;
+  nurseNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RequestActionDto {
+  pokemonId: string;
+  type: ActionType;
+  trainerNote?: string;
+}
+
+export interface ReviewActionDto {
+  status: ActionStatus.APPROVED | ActionStatus.REJECTED;
+  nurseNote?: string;
+}
+
 export type UpdatePokemonDto = Partial<CreatePokemonDto>;

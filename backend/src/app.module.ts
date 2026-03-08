@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { PokemonsModule } from './pokemons/pokemons.module';
 import { Pokemon } from './pokemons/entities/pokemon.entity';
+import { PokemonAction } from './pokemon-actions/entities/pokemon-action.entity';
+import { PokemonActionsModule } from './pokemon-actions/pokemon-actions.module';
 
 @Module({
 	imports: [
@@ -19,7 +21,7 @@ import { Pokemon } from './pokemons/entities/pokemon.entity';
 				username: configService.get('DB_USERNAME'),
 				password: configService.get('DB_PASSWORD'),
 				database: configService.get('DB_NAME'),
-				entities: [User, Pokemon],
+				entities: [User, Pokemon, PokemonAction],
 				// TODO: quando estiver em produção, trocar por false e utilizar migrations
 				synchronize: true,
 			}),
@@ -28,6 +30,7 @@ import { Pokemon } from './pokemons/entities/pokemon.entity';
 		AuthModule,
 		UsersModule,
 		PokemonsModule,
+    PokemonActionsModule,
 	],
 })
 export class AppModule {}

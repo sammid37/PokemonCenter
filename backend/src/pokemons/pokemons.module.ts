@@ -9,5 +9,6 @@ import { UsersModule } from '../users/users.module';
 	imports: [TypeOrmModule.forFeature([Pokemon]), UsersModule],
 	providers: [PokemonsService],
 	controllers: [PokemonsController],
+  exports: [PokemonsService],
 })
 export class PokemonsModule {}

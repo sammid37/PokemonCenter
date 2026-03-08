@@ -30,8 +30,9 @@ export class PokemonsController {
   @Get()
   @ApiOperation({ summary: 'Listar todos os pokémons' })
   @ApiResponse({ status: 200, description: 'Lista de pokémons retornada com sucesso' })
-  findAll() {
-    return this.pokemonsService.findAll();
+  findAll(@Request() req) {
+    // TODO: depois validar se o tipo de usuário é do tipo treinador ou enfermeira Joy
+    return this.pokemonsService.findAll(req.user.id);
   }
 
   @Get(':id')

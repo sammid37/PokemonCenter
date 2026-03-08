@@ -1,5 +1,7 @@
 import { Pokemon, PokemonGender, PokemonHealthStatus } from '@/types';
 
+import Image from 'next/image'; 
+
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'badge-ghost',
   Fire: 'badge-error',
@@ -32,6 +34,10 @@ const HEALTH_STATUS_STYLE: Record<PokemonHealthStatus, { badge: string; label: s
   [PokemonHealthStatus.FAINTED]:       { badge: 'badge-error',   label: '✕ Desmaiado' },
 };
 
+function getPokemonImageUrl(pokedexNumber: number): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokedexNumber}.png`;
+}
+
 interface PokemonCardProps {
   pokemon: Pokemon;
   currentUserId: string;
@@ -48,9 +54,26 @@ export default function PokemonCard({
   // Verifica se o usuário logado é o dono do pokémon
   const isOwner = pokemon.createdBy?.id === currentUserId;
   const healthStyle = HEALTH_STATUS_STYLE[pokemon.healthStatus];
+  
+  const imageUrl = getPokemonImageUrl(pokemon.pokedexNumber);
 
   return (
     <div className="card bg-base-100 shadow-md border border-base-300 hover:shadow-lg transition-shadow">
+      
+      <figure className="bg-base-200 px-6 pt-6">
+        <Image
+          src={imageUrl}
+          alt={pokemon.name}
+          width={120}
+          height={120}
+          className="object-contain drop-shadow-md"
+          // Fallback para sprite padrão caso a imagem oficial não carregue
+          onError={(e) => {
+            e.currentTarget.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.pokedexNumber}.png`;
+          }}
+        />
+      </figure>
+
       <div className="card-body gap-3">
 
         {/* Header — nome, número e gênero */}

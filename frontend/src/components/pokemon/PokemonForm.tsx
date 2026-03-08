@@ -10,6 +10,9 @@ import {
   UpdatePokemonDto,
 } from '@/types';
 
+import { PokeApiPokemon, pokeApiService } from '@/services/pokeapi.service';
+import PokemonSearch from './PokemonSearch';
+
 interface PokemonFormProps {
   initialData?: Pokemon;
   onSubmit: (data: CreatePokemonDto | UpdatePokemonDto) => Promise<void>;
@@ -17,6 +20,27 @@ interface PokemonFormProps {
 }
 
 const ALL_TYPES = Object.values(PokemonType);
+
+const POKEAPI_TYPE_MAP: Record<string, PokemonType> = {
+  normal: PokemonType.NORMAL,
+  fire: PokemonType.FIRE,
+  water: PokemonType.WATER,
+  grass: PokemonType.GRASS,
+  electric: PokemonType.ELECTRIC,
+  ice: PokemonType.ICE,
+  fighting: PokemonType.FIGHTING,
+  poison: PokemonType.POISON,
+  ground: PokemonType.GROUND,
+  flying: PokemonType.FLYING,
+  psychic: PokemonType.PSYCHIC,
+  bug: PokemonType.BUG,
+  rock: PokemonType.ROCK,
+  ghost: PokemonType.GHOST,
+  dragon: PokemonType.DRAGON,
+  steel: PokemonType.STEEL,
+  dark: PokemonType.DARK,
+  fairy: PokemonType.FAIRY,
+};
 
 export default function PokemonForm({ initialData, onSubmit, isLoading }: PokemonFormProps) {
   const [formData, setFormData] = useState({
@@ -32,6 +56,22 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
     healthStatus: initialData?.healthStatus ?? PokemonHealthStatus.HEALTHY,
   });
   const [error, setError] = useState<string | null>(null);
+
+  // Preenche os campos automaticamente ao selecionar um pokémon da PokéAPI
+  function handlePokeApiSelect(pokemon: PokeApiPokemon) {
+    const mappedTypes = pokemon.types
+      .map((t) => POKEAPI_TYPE_MAP[t.type.name])
+      .filter(Boolean) as PokemonType[];
+
+    setFormData((prev) => ({
+      ...prev,
+      name: pokeApiService.formatName(pokemon.name),
+      pokedexNumber: pokemon.id,
+      height: pokeApiService.formatHeight(pokemon.height),
+      weight: pokeApiService.formatWeight(pokemon.weight),
+      types: mappedTypes,
+    }));
+  }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -65,12 +105,16 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
     e.preventDefault();
     setError(null);
 
+    if (!formData.name.trim()) {
+      setError('Selecione um pokémon pelo campo de busca');
+      return;
+    }
+
     if (formData.types.length === 0) {
       setError('Selecione pelo menos 1 tipo');
       return;
     }
 
-    // Remove o nickname do payload se estiver vazio
     const payload = {
       ...formData,
       nickname: formData.nickname.trim() || undefined,
@@ -88,42 +132,31 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </div>
       )}
 
-      {/* Nome e Apelido */}
-      <div className="grid grid-cols-2 gap-3">
-        <label className="form-control">
-          <div className="label">
-            <span className="label-text">Nome da espécie</span>
-          </div>
-          <input
-            type="text"
-            name="name"
-            placeholder="Pikachu"
-            className="input input-bordered input-sm w-full"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
+      {/* Busca na PokéAPI com autocomplete */}
+      <PokemonSearch
+        onSelect={handlePokeApiSelect}
+        initialName={initialData?.name}
+      />
 
-        <label className="form-control">
-          <div className="label">
-            <span className="label-text">
-              Apelido{' '}
-              <span className="text-base-content/50 text-xs">(opcional)</span>
-            </span>
-          </div>
-          <input
-            type="text"
-            name="nickname"
-            placeholder="Apelido do seu pokémon"
-            className="input input-bordered input-sm w-full"
-            value={formData.nickname}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
+      {/* Apelido */}
+      <label className="form-control">
+        <div className="label">
+          <span className="label-text">
+            Apelido{' '}
+            <span className="text-base-content/50 text-xs">(opcional)</span>
+          </span>
+        </div>
+        <input
+          type="text"
+          name="nickname"
+          placeholder="Apelido do seu pokémon"
+          className="input input-bordered input-sm w-full"
+          value={formData.nickname}
+          onChange={handleChange}
+        />
+      </label>
 
-      {/* Número da Pokédex */}
+      {/* Número da Pokédex — preenchido automaticamente */}
       <label className="form-control">
         <div className="label">
           <span className="label-text">Número da Pokédex</span>
@@ -131,7 +164,6 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         <input
           type="number"
           name="pokedexNumber"
-          placeholder="25"
           className="input input-bordered input-sm w-full"
           value={formData.pokedexNumber}
           onChange={handleChange}
@@ -175,7 +207,7 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </label>
       </div>
 
-      {/* Altura e Peso */}
+      {/* Altura e Peso — preenchidos automaticamente */}
       <div className="grid grid-cols-2 gap-3">
         <label className="form-control">
           <div className="label">
@@ -251,7 +283,7 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </label>
       </div>
 
-      {/* Tipos */}
+      {/* Tipos — preenchidos automaticamente mas editáveis */}
       <div className="form-control">
         <div className="label">
           <span className="label-text">

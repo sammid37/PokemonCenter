@@ -11,7 +11,13 @@ async function bootstrap() {
 
 	app.useGlobalFilters(new HttpExceptionFilter());
 
-	app.enableCors();
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://pokemon-center-green.vercel.app/', 
+    ],
+    credentials: true,
+  });
 
 	const config = new DocumentBuilder()
 		.setTitle('Centro Pokémon API')

@@ -1,6 +1,6 @@
 # Centro Pokémon
 
-![Prévia do Pokemon Center](#)
+![Prévia do Pokemon Center](/assets/preview.png)
 
 > Aplicação desenvolvida em Node.js para auxiliar o gerenciamento de pokémons em um Centro Pokémon.  
 > Este projeto integra o desafio técnico do processo seletivo para Desenvolvedor Júnior da SIMINT.
@@ -116,6 +116,10 @@ Visite: [`https://pokemon-center-green.vercel.app/`](https://pokemon-center-gree
 
 ## Sobre o projeto
 
+| Prévia Trainador | Prévia Enfermeira Joy |
+| :--- | :--- |
+| ![Prévia Treinador](/assets/record_trainer.mp4) | ![Prévia Enfermeira](/assets/record_nurse_joy.mp4) |
+
 As funcionalidades a seguir foram implementadas conforme especificado no desafio técnico:
 
 ### Autenticação
@@ -145,5 +149,10 @@ As funcionalidades a seguir foram implementadas conforme especificado no desafio
 * API RESTful desenvolvida com NestJS e TypeScript
 * Banco de dados PostgreSQL com TypeORM
 * Endpoints protegidos por autenticação JWT
+
+### Extras
+* Consumo da PokéAPI para melhorar a experiência de buscar por pokémons e obter o número oficial da pokédex, demais dados de cadastro ficam por conta do usuário;
+* Solicitar cuidados para seus pokémons (ação aprovada ou recusada por uma enfermeira Joy)
+* Implementação de testes unitários no backend da aplicação + GitHub Actions 
 
 ---

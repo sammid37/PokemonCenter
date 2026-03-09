@@ -132,11 +132,29 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
         </div>
       )}
 
-      {/* Busca na PokéAPI com autocomplete */}
-      <PokemonSearch
-        onSelect={handlePokeApiSelect}
-        initialName={initialData?.name}
-      />
+      {/* Busca na PokéAPI e número da Pokédex — visíveis apenas no cadastro */}
+      {!initialData && (
+        <>
+          <PokemonSearch
+            onSelect={handlePokeApiSelect}
+          />
+
+          <label className="form-control">
+            <div className="label">
+              <span className="label-text">Número da Pokédex</span>
+            </div>
+            <input
+              type="number"
+              name="pokedexNumber"
+              className="input input-bordered input-sm w-full"
+              value={formData.pokedexNumber}
+              onChange={handleChange}
+              min={1}
+              required
+            />
+          </label>
+        </>
+      )}
 
       {/* Apelido */}
       <label className="form-control">
@@ -153,22 +171,6 @@ export default function PokemonForm({ initialData, onSubmit, isLoading }: Pokemo
           className="input input-bordered input-sm w-full"
           value={formData.nickname}
           onChange={handleChange}
-        />
-      </label>
-
-      {/* Número da Pokédex — preenchido automaticamente */}
-      <label className="form-control">
-        <div className="label">
-          <span className="label-text">Número da Pokédex</span>
-        </div>
-        <input
-          type="number"
-          name="pokedexNumber"
-          className="input input-bordered input-sm w-full"
-          value={formData.pokedexNumber}
-          onChange={handleChange}
-          min={1}
-          required
         />
       </label>
 

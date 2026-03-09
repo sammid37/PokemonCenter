@@ -106,6 +106,42 @@ Você pode se cadastrar como:
 - 🎒 **Treinador** — cadastra e gerencia seus próprios pokémons e solicita cuidados no Centro Pokémon
 - 🏥 **Enfermeira Joy** — visualiza todos os pokémons cadastrados e aprova ou recusa as solicitações de cuidado dos treinadores
 
+### Testes unitários
+
+O backend conta com testes unitários implementados com **Jest** e **ts-jest**, cobrindo as camadas de service e controller da aplicação.
+
+#### Arquivos com cobertura de testes
+
+| Arquivo | Camada |
+|---|---|
+| `src/auth/auth.controller.spec.ts` | Controller |
+| `src/auth/auth.service.spec.ts` | Service |
+| `src/pokemons/pokemons.controller.spec.ts` | Controller |
+| `src/pokemons/pokemons.service.spec.ts` | Service |
+| `src/pokemon-actions/pokemon-actions.controller.spec.ts` | Controller |
+| `src/pokemon-actions/pokemon-actions.service.spec.ts` | Service |
+| `src/users/users.service.spec.ts` | Service |
+
+##### Coverage
+![PokéCenter Backend Tests Coverage](/assets/pokecenter_backend_test_coverage.jpeg) 
+
+#### Comandos
+
+Execute os comandos a seguir dentro do diretório `backend/`:
+```bash
+# Rodar todos os testes
+npm run test
+
+# Rodar os testes em modo watch — re-executa ao salvar arquivos
+npm run test:watch
+
+# Rodar os testes e exibir o relatório de cobertura
+npm run test:cov
+
+# Rodar os testes e salvar o relatório de cobertura em uma pasta personalizada
+npm test -- --coverage --coverageDirectory='my-coverage-report'
+```
+
 ## Deploy
 
 > Banco de Dados: Neon

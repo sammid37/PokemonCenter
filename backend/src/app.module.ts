@@ -22,8 +22,16 @@ import { PokemonActionsModule } from './pokemon-actions/pokemon-actions.module';
 				password: configService.get('DB_PASSWORD'),
 				database: configService.get('DB_NAME'),
 				entities: [User, Pokemon, PokemonAction],
-				// TODO: quando estiver em produção, trocar por false e utilizar migrations
-				synchronize: true,
+        
+				synchronize: configService.get('NODE_ENV') !== 'production',
+
+        // Roda as migrations automaticamente ao iniciar em produção
+        migrationsRun: configService.get('NODE_ENV') === 'production',
+        migrations: [__dirname + '/migrations/*.js'],
+
+        ssl: configService.get('NODE_ENV') === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
 			}),
 			inject: [ConfigService],
 		}),

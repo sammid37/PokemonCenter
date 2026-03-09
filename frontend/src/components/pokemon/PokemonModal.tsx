@@ -20,7 +20,7 @@ export default function PokemonModal({
 }: PokemonModalProps) {
   return (
     <dialog id="pokemon_modal" className="modal modal-open">
-      <div className="modal-box w-11/12 max-w-lg">
+      <div className="modal-box w-11/12 max-w-lg h-150 overflow-y-auto">
 
         <h3 className="font-bold text-lg mb-4">
           {mode === 'create' ? 'Cadastrar Pokémon' : `Editar ${pokemon?.name}`}

@@ -23,7 +23,7 @@ export default function Navbar({ user }: NavbarProps) {
     <div className="navbar bg-base-100 shadow-md px-4">
       <div className="flex-1">
         <Link href="/dashboard" className="text-xl font-bold text-primary">
-          Centro Pokémon
+          PokéCenter
         </Link>
       </div>
 

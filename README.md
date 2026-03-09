@@ -106,6 +106,17 @@ Você pode se cadastrar como:
 - 🎒 **Treinador** — cadastra e gerencia seus próprios pokémons e solicita cuidados no Centro Pokémon
 - 🏥 **Enfermeira Joy** — visualiza todos os pokémons cadastrados e aprova ou recusa as solicitações de cuidado dos treinadores
 
+### Testes unitários
+
+Há testes unitários implamentados no backend desta aplicação. Aqui estão alguns comandos para executar e ver a cobertura dos testes.
+
+```bash
+cd backend
+npm test -- --coverage --coverageDirectory='my-coverage-report'
+```
+
+O arquivo HTML que apresenta a cobertura dos testes pode ser acomapnhado neste arquivo executado com o Live Server do VS Code ou abrindo-o diretamente em seu navegador de preferência: `backend\coverage\lcov-report\index.html`.
+
 ## Deploy
 
 > Banco de Dados: Neon

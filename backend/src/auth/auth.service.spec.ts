@@ -4,6 +4,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { UserRole } from '../users/enums/user-role.enum';
 
 // Mocka o módulo inteiro do bcryptjs — evita o erro "Cannot redefine property"
 jest.mock('bcryptjs', () => ({
@@ -14,11 +15,13 @@ jest.mock('bcryptjs', () => ({
 // Importa depois do mock para pegar a versão mockada
 import * as bcrypt from 'bcryptjs';
 
-const mockUser = (): User => ({
+// Cria um usuário mock com role configurável — trainer por padrão
+const mockUser = (role: UserRole = UserRole.TRAINER): User => ({
 	id: 'uuid-123',
 	name: 'Ash Ketchum',
 	email: 'ash@pokemon.com',
 	password: 'hashed_password',
+	role,
 	createdAt: new Date(),
 });
 
@@ -49,7 +52,6 @@ describe('AuthService', () => {
 		usersService = module.get(UsersService);
 		jwtService = module.get(JwtService);
 
-		// Reseta os mocks do bcrypt antes de cada teste
 		jest.clearAllMocks();
 	});
 
@@ -57,11 +59,11 @@ describe('AuthService', () => {
 		expect(service).toBeDefined();
 	});
 
+	// ------------------------------------------------------------------ //
 	describe('register', () => {
-		it('deve registrar um usuário e retornar o token', async () => {
-			const user = mockUser();
+		it('deve registrar um treinador e retornar o token', async () => {
+			const user = mockUser(UserRole.TRAINER);
 
-			// Usa mockResolvedValue diretamente na função mockada
 			(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
 			usersService.create.mockResolvedValue(user);
 
@@ -69,6 +71,7 @@ describe('AuthService', () => {
 				name: 'Ash Ketchum',
 				email: 'ash@pokemon.com',
 				password: '123456',
+				role: UserRole.TRAINER,
 			});
 
 			expect(result).toEqual({ access_token: 'mock_token' });
@@ -76,13 +79,56 @@ describe('AuthService', () => {
 			expect(jwtService.sign).toHaveBeenCalledWith({
 				sub: user.id,
 				email: user.email,
+				role: UserRole.TRAINER,
+				name: user.name,
 			});
+		});
+
+		it('deve registrar uma enfermeira Joy e retornar o token', async () => {
+			const user = mockUser(UserRole.NURSE);
+
+			(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
+			usersService.create.mockResolvedValue(user);
+
+			const result = await service.register({
+				name: 'Ash Ketchum',
+				email: 'ash@pokemon.com',
+				password: '123456',
+				role: UserRole.NURSE,
+			});
+
+			expect(result).toEqual({ access_token: 'mock_token' });
+			expect(jwtService.sign).toHaveBeenCalledWith({
+				sub: user.id,
+				email: user.email,
+				role: UserRole.NURSE,
+				name: user.name,
+			});
+		});
+
+		it('deve registrar com role trainer por padrão quando role não for informada', async () => {
+			const user = mockUser(UserRole.TRAINER);
+
+			(bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
+			usersService.create.mockResolvedValue(user);
+
+			await service.register({
+				name: 'Ash Ketchum',
+				email: 'ash@pokemon.com',
+				password: '123456',
+				// role não informada — deve usar trainer como padrão
+			});
+
+			expect(jwtService.sign).toHaveBeenCalledWith(
+				expect.objectContaining({ role: UserRole.TRAINER }),
+			);
 		});
 	});
 
+	// ------------------------------------------------------------------ //
 	describe('login', () => {
-		it('deve autenticar o usuário e retornar o token', async () => {
-			const user = mockUser();
+		it('deve autenticar um treinador e retornar o token', async () => {
+			const user = mockUser(UserRole.TRAINER);
 
 			usersService.findByEmail.mockResolvedValue(user);
 			(bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -93,6 +139,32 @@ describe('AuthService', () => {
 			});
 
 			expect(result).toEqual({ access_token: 'mock_token' });
+			expect(jwtService.sign).toHaveBeenCalledWith({
+				sub: user.id,
+				email: user.email,
+				role: UserRole.TRAINER,
+				name: user.name,
+			});
+		});
+
+		it('deve autenticar uma enfermeira Joy e retornar o token', async () => {
+			const user = mockUser(UserRole.NURSE);
+
+			usersService.findByEmail.mockResolvedValue(user);
+			(bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+			const result = await service.login({
+				email: 'joy@pokemon.com',
+				password: '123456',
+			});
+
+			expect(result).toEqual({ access_token: 'mock_token' });
+			expect(jwtService.sign).toHaveBeenCalledWith({
+				sub: user.id,
+				email: user.email,
+				role: UserRole.NURSE,
+				name: user.name,
+			});
 		});
 
 		it('deve lançar UnauthorizedException quando usuário não existe', async () => {
@@ -107,7 +179,7 @@ describe('AuthService', () => {
 		});
 
 		it('deve lançar UnauthorizedException quando senha está incorreta', async () => {
-			const user = mockUser();
+			const user = mockUser(UserRole.TRAINER);
 
 			usersService.findByEmail.mockResolvedValue(user);
 			(bcrypt.compare as jest.Mock).mockResolvedValue(false);

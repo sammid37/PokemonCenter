@@ -108,14 +108,39 @@ Você pode se cadastrar como:
 
 ### Testes unitários
 
-Há testes unitários implamentados no backend desta aplicação. Aqui estão alguns comandos para executar e ver a cobertura dos testes.
+O backend conta com testes unitários implementados com **Jest** e **ts-jest**, cobrindo as camadas de service e controller da aplicação.
 
+#### Arquivos com cobertura de testes
+
+| Arquivo | Camada |
+|---|---|
+| `src/auth/auth.controller.spec.ts` | Controller |
+| `src/auth/auth.service.spec.ts` | Service |
+| `src/pokemons/pokemons.controller.spec.ts` | Controller |
+| `src/pokemons/pokemons.service.spec.ts` | Service |
+| `src/pokemon-actions/pokemon-actions.controller.spec.ts` | Controller |
+| `src/pokemon-actions/pokemon-actions.service.spec.ts` | Service |
+| `src/users/users.service.spec.ts` | Service |
+
+##### Coverage
+![PokéCenter Backend Tests Coverage](/assets/pokecenter_backend_test_coverage.jpeg) 
+
+#### Comandos
+
+Execute os comandos a seguir dentro do diretório `backend/`:
 ```bash
-cd backend
+# Rodar todos os testes
+npm run test
+
+# Rodar os testes em modo watch — re-executa ao salvar arquivos
+npm run test:watch
+
+# Rodar os testes e exibir o relatório de cobertura
+npm run test:cov
+
+# Rodar os testes e salvar o relatório de cobertura em uma pasta personalizada
 npm test -- --coverage --coverageDirectory='my-coverage-report'
 ```
-
-O arquivo HTML que apresenta a cobertura dos testes pode ser acomapnhado neste arquivo executado com o Live Server do VS Code ou abrindo-o diretamente em seu navegador de preferência: `backend\coverage\lcov-report\index.html`.
 
 ## Deploy
 

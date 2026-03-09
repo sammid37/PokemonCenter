@@ -17,7 +17,7 @@ export class PokemonAction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Pokemon, { eager: true })
+  @ManyToOne(() => Pokemon, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'pokemon_id' })
   pokemon: Pokemon;
 

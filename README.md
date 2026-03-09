@@ -1,11 +1,14 @@
 # Centro Pokémon
 
+![Prévia do Pokemon Center](#)
+
 > Aplicação desenvolvida em Node.js para auxiliar o gerenciamento de pokémons em um Centro Pokémon.  
 > Este projeto integra o desafio técnico do processo seletivo para Desenvolvedor Júnior da SIMINT.
 
 - [Tecnologias](#tecnologias)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
+- [Deploy](#deploy)
 - [Sobre o Projeto](#sobre-o-projeto)
 
 ---
@@ -35,16 +38,6 @@
 A API da aplicação Pokémon Center foi documentada por utilizando Swagger e inclui alguns exemplos de dados e de respostas para cada requisição. 
 
 Ao executar o projeto localmente, pode-se acompanhar a documentação por meio deste endereço: [`http://localhost:3001/api`](http://localhost:3001/api).
-
-### Prototipação deste projeto
-
-[![Figma - Link do Protótipo](https://img.shields.io/badge/Figma-%20Link%20do%20Prot%C3%B3tipo%20em%20breve-4c4f69?style=for-the-badge&logo=figma&logoColor=white)](#)
-
-O visual da aplicação foi inspirado na própria estética dos jogos da franquia e outros elementos de UI/UX da Nintendo, como por exemplo Pokémon Go, Pokémon Sleep, Pokopia e Animal Crossing. 
-
-A prototipação foi feita no Figma e pode ser visualizada por completo por meio deste [link](#).
-
-![Previa do protótipo Pokemon Center](#)
 
 ## Pré-requisitos
 
@@ -112,6 +105,14 @@ npm run dev
 Você pode se cadastrar como:
 - 🎒 **Treinador** — cadastra e gerencia seus próprios pokémons e solicita cuidados no Centro Pokémon
 - 🏥 **Enfermeira Joy** — visualiza todos os pokémons cadastrados e aprova ou recusa as solicitações de cuidado dos treinadores
+
+## Deploy
+
+> Banco de Dados: Neon
+> Backend: Render
+> Frontend: Vercel
+
+Visite: [`https://pokemon-center-green.vercel.app/`](https://pokemon-center-green.vercel.app/)
 
 ## Sobre o projeto
 

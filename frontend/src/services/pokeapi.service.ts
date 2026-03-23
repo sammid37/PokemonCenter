@@ -1,3 +1,7 @@
+const POKEAPI_BASE = 'https://pokeapi.co/api/v2';
+const NAMES_CACHE_KEY = 'pokeapi_names_cache';
+const NAMES_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 export interface PokeApiSearchResult {
   name: string;
   url: string;
@@ -6,8 +10,8 @@ export interface PokeApiSearchResult {
 export interface PokeApiPokemon {
   id: number;
   name: string;
-  height: number; // retornado em decímetros, converte para metros
-  weight: number; // retornado em hectogramas, converte para kg
+  height: number;
+  weight: number;
   sprites: {
     front_default: string;
     other: {
@@ -24,31 +28,83 @@ export interface PokeApiPokemon {
   }[];
 }
 
+interface NamesCache {
+  names: PokeApiSearchResult[];
+  cachedAt: number;
+}
+
+async function fetchAllNames(): Promise<PokeApiSearchResult[]> {
+  const stored = sessionStorage.getItem(NAMES_CACHE_KEY);
+
+  if (stored) {
+    const cache: NamesCache = JSON.parse(stored);
+    if (Date.now() - cache.cachedAt < NAMES_CACHE_TTL_MS) {
+      return cache.names;
+    }
+  }
+
+  const response = await fetch(`${POKEAPI_BASE}/pokemon?limit=2000&offset=0`);
+  const data = await response.json();
+  const names: PokeApiSearchResult[] = data.results;
+
+  sessionStorage.setItem(
+    NAMES_CACHE_KEY,
+    JSON.stringify({ names, cachedAt: Date.now() } satisfies NamesCache),
+  );
+
+  return names;
+}
+
 export const pokeApiService = {
-  // Busca pokémons pelo nome parcial
-  async search(query: string): Promise<PokeApiSearchResult[]> {
-    if (!query || query.length < 2) return [];
+  async search(
+    query: string,
+    page = 1,
+    pageSize = 8,
+  ): Promise<{ results: PokeApiSearchResult[]; hasMore: boolean }> {
+    if (!query || query.length < 2) return { results: [], hasMore: false };
 
-    const response = await fetch(
-      'https://pokeapi.co/api/v2/pokemon?limit=2000',
-    );
-    const data = await response.json();
+    const allNames = await fetchAllNames();
 
-    return (data.results as PokeApiSearchResult[]).filter((pokemon) =>
-      pokemon.name.toLowerCase().includes(query.toLowerCase()),
+    const filtered = allNames.filter((p) =>
+      p.name.toLowerCase().includes(query.toLowerCase()),
     );
+
+    const start = (page - 1) * pageSize;
+    const results = filtered.slice(start, start + pageSize);
+    const hasMore = start + pageSize < filtered.length;
+
+    return { results, hasMore };
   },
 
   async getByName(name: string): Promise<PokeApiPokemon> {
     const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`,
+      `${POKEAPI_BASE}/pokemon/${name.toLowerCase()}`,
     );
 
     if (!response.ok) {
       throw new Error(`Pokémon "${name}" não encontrado na PokéAPI`);
     }
 
-    return response.json();
+    const raw = await response.json();
+
+    return {
+      id: raw.id,
+      name: raw.name,
+      height: raw.height,
+      weight: raw.weight,
+      sprites: {
+        front_default: raw.sprites.front_default,
+        other: {
+          'official-artwork': {
+            front_default: raw.sprites.other?.['official-artwork']?.front_default ?? '',
+          },
+        },
+      },
+      types: (raw.types as { slot: number; type: { name: string } }[]).map((t) => ({
+        slot: t.slot,
+        type: { name: t.type.name },
+      })),
+    };
   },
 
   formatName(name: string): string {
@@ -60,7 +116,7 @@ export const pokeApiService = {
     return parseFloat((height / 10).toFixed(1));
   },
 
-  // Converte peso de hectogramas para quilogramas (ex: 60 → 6.0)
+  // Converte peso de hectogramas para quilogramas (ex: 4 → 0.4)
   formatWeight(weight: number): number {
     return parseFloat((weight / 10).toFixed(1));
   },

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { PokeApiPokemon } from '@/services/pokeapi.service';
+import { pokeApiService, PokeApiPokemon } from '@/services/pokeapi.service';
 import { usePokemonSearch } from '@/hooks/usePokemonSearch';
 
 interface PokemonSearchProps {
@@ -9,18 +9,19 @@ interface PokemonSearchProps {
   initialName?: string;
 }
 
-export default function PokemonSearch({ onSelect, initialName }: PokemonSearchProps) {
+export default function PokemonSearch({ onSelect }: PokemonSearchProps) {
   const {
     query,
     suggestions,
     selectedPokemon,
     isSearching,
+    hasMore,
     handleQueryChange,
     handleSelectSuggestion,
+    handleLoadMore,
     clearSelection,
   } = usePokemonSearch(onSelect);
 
-  // URL da imagem oficial do pokémon selecionado
   const spriteUrl =
     selectedPokemon?.sprites.other['official-artwork'].front_default ??
     selectedPokemon?.sprites.front_default;
@@ -42,13 +43,11 @@ export default function PokemonSearch({ onSelect, initialName }: PokemonSearchPr
             autoComplete="off"
           />
 
-          {/* Spinner de busca */}
           {isSearching && (
             <span className="loading loading-spinner loading-xs text-primary absolute right-3" />
           )}
         </div>
 
-        {/* Lista de sugestões */}
         {suggestions.length > 0 && (
           <ul className="absolute z-50 w-full mt-1 bg-base-100 border border-base-300 rounded-box shadow-lg max-h-48 overflow-y-auto">
             {suggestions.map((suggestion) => (
@@ -62,11 +61,27 @@ export default function PokemonSearch({ onSelect, initialName }: PokemonSearchPr
                 </button>
               </li>
             ))}
+
+            {hasMore && (
+              <li>
+                <button
+                  type="button"
+                  className="w-full text-center px-4 py-2 hover:bg-base-200 text-xs text-primary"
+                  onClick={handleLoadMore}
+                  disabled={isSearching}
+                >
+                  {isSearching ? (
+                    <span className="loading loading-spinner loading-xs" />
+                  ) : (
+                    'Carregar mais'
+                  )}
+                </button>
+              </li>
+            )}
           </ul>
         )}
       </div>
 
-      {/* Preview do pokémon selecionado */}
       {selectedPokemon && spriteUrl && (
         <div className="flex items-center gap-3 mt-2 p-2 bg-base-200 rounded-box">
           <Image
@@ -98,5 +113,3 @@ export default function PokemonSearch({ onSelect, initialName }: PokemonSearchPr
     </div>
   );
 }
-
-import { pokeApiService } from '@/services/pokeapi.service';

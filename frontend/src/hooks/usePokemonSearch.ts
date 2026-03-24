@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { pokeApiService, PokeApiPokemon, PokeApiSearchResult } from '@/services/pokeapi.service';
 
+const PAGE_SIZE = 8;
+
 interface UsePokemonSearchReturn {
   query: string;
   suggestions: PokeApiSearchResult[];
   selectedPokemon: PokeApiPokemon | null;
   isSearching: boolean;
+  hasMore: boolean;
   handleQueryChange: (value: string) => void;
   handleSelectSuggestion: (name: string) => Promise<void>;
+  handleLoadMore: () => Promise<void>;
   clearSelection: () => void;
 }
 
@@ -18,28 +22,38 @@ export function usePokemonSearch(
   const [suggestions, setSuggestions] = useState<PokeApiSearchResult[]>([]);
   const [selectedPokemon, setSelectedPokemon] = useState<PokeApiPokemon | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Evita chamadas excessivas à PokéAPI ao digitar
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentQueryRef = useRef('');
 
   useEffect(() => {
-    // Limpa sugestões se o campo estiver vazio
     if (!query || query.length < 2) {
       setSuggestions([]);
+      setPage(1);
+      setHasMore(false);
       return;
     }
 
-    // Debounce de 300ms para não buscar a cada tecla pressionada
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
+      currentQueryRef.current = query;
       setIsSearching(true);
+      setPage(1);
+
       try {
-        const results = await pokeApiService.search(query);
-        // Limita a 8 sugestões para não poluir a interface
-        setSuggestions(results.slice(0, 8));
+        const { results, hasMore: more } = await pokeApiService.search(query, 1, PAGE_SIZE);
+
+        if (currentQueryRef.current === query) {
+          setSuggestions(results);
+          setHasMore(more);
+        }
       } finally {
-        setIsSearching(false);
+        if (currentQueryRef.current === query) {
+          setIsSearching(false);
+        }
       }
     }, 300);
 
@@ -48,9 +62,26 @@ export function usePokemonSearch(
     };
   }, [query]);
 
+  async function handleLoadMore() {
+    if (!hasMore || isSearching) return;
+
+    const nextPage = page + 1;
+    setIsSearching(true);
+
+    try {
+      const { results, hasMore: more } = await pokeApiService.search(query, nextPage, PAGE_SIZE);
+      setSuggestions((prev) => [...prev, ...results]);
+      setPage(nextPage);
+      setHasMore(more);
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
   async function handleSelectSuggestion(name: string) {
     setIsSearching(true);
     setSuggestions([]);
+    setHasMore(false);
 
     try {
       const pokemon = await pokeApiService.getByName(name);
@@ -64,7 +95,6 @@ export function usePokemonSearch(
 
   function handleQueryChange(value: string) {
     setQuery(value);
-    // Limpa a seleção se o usuário editar o campo manualmente
     if (selectedPokemon) setSelectedPokemon(null);
   }
 
@@ -72,6 +102,8 @@ export function usePokemonSearch(
     setQuery('');
     setSuggestions([]);
     setSelectedPokemon(null);
+    setPage(1);
+    setHasMore(false);
   }
 
   return {
@@ -79,8 +111,10 @@ export function usePokemonSearch(
     suggestions,
     selectedPokemon,
     isSearching,
+    hasMore,
     handleQueryChange,
     handleSelectSuggestion,
+    handleLoadMore,
     clearSelection,
   };
 }
